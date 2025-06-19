@@ -1,4 +1,4 @@
-# AI Note
+# Brainy Note
 
 ## Overview
 
