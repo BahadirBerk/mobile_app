@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI Note is an intelligent, AI-powered mobile note-taking application specifically designed for high school and university students. Built using Flutter, AI Note offers powerful note management combined with advanced AI capabilities, ensuring efficient and productive study sessions.
+Brainy Note is an intelligent, AI-powered mobile note-taking application specifically designed for high school and university students. Built using Flutter, Brainy Note offers powerful note management combined with advanced AI capabilities, ensuring efficient and productive study sessions.
 
 ## Key Features
 
@@ -30,6 +30,7 @@ AI Note is an intelligent, AI-powered mobile note-taking application specificall
 ### Security and Privacy
 
 * Basic encryption and security measures to ensure user data confidentiality.
+* Notes are encrypted using a simple XOR-based method before storage.
 
 ## Project Structure
 
@@ -78,13 +79,13 @@ The application architecture is structured for easy integration of future enhanc
 1. Clone the repository:
 
    ```
-   git clone https://github.com/yourusername/ai_note.git
+   git clone https://github.com/yourusername/brainy_note.git
    ```
 
 2. Navigate to the project directory:
 
    ```
-   cd ai_note
+   cd brainy_note
    ```
 
 3. Install dependencies:
