@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 
 /// Data model for a note.
 class Note {
