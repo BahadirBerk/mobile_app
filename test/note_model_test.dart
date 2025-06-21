@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/models/note.dart';
+import 'package:brainy_note/models/note.dart';
 
 void main() {
   test('Note toMap and fromMap', () {

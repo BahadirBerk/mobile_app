@@ -1,0 +1,59 @@
+Latin: "Carpe Diem"
+Aciklama: "Günü yakala ve her anı değerlendir. Yarını düşünme, bugünü yaşa. Hayat kısadır, her saniyeyi anlamlı kıl."
+
+Latin: "Veni, Vidi, Vici"
+Aciklama: "Geldim, gördüm, yendim. Başarıya ulaşmak için kararlılık ve hızlı hareket etmek gerekir. Hedeflerine odaklan ve vazgeçme."
+
+Latin: "Cogito, Ergo Sum"
+Aciklama: "Düşünüyorum, o halde varım. Düşünme yeteneği, varlığımızın en büyük kanıtıdır. Sürekli öğren ve geliş."
+
+Latin: "Alea Iacta Est"
+Aciklama: "Zar atıldı. Karar verildi, artık geri dönüş yok. Sonuç ne olursa olsun devam et ve mücadele etmekten vazgeçme."
+
+Latin: "Per Aspera Ad Astra"
+Aciklama: "Zorluklarla yıldızlara. Zorlukları aşarak hedeflerine ulaşabilirsin. Her engel, seni daha güçlü yapar."
+
+Latin: "Memento Mori"
+Aciklama: "Ölümlü olduğunu hatırla. Zamanın değerini bil ve her anı anlamlı kıl. Hayat kısadır, boşa harcama."
+
+Latin: "Dum Spiro, Spero"
+Aciklama: "Nefes aldığım sürece umut ediyorum. Yaşadığın sürece umut etmeye devam et. Asla pes etme, her zaman bir yol vardır."
+
+Latin: "Festina Lente"
+Aciklama: "Acele et, yavaş. Hızlı ama dikkatli hareket et. Acele et ama düşünmeden değil. Planlı ve kararlı ol."
+
+Latin: "Lux in Tenebris"
+Aciklama: "Karanlıkta ışık. En karanlık zamanlarda bile umut vardır. Işık her zaman bulunur, sadece bakmayı bil."
+
+Latin: "Scientia Potentia Est"
+Aciklama: "Bilgi güçtür. Bilgi en büyük güçtür. Öğrenmeye devam et ve kendini geliştir. Her gün yeni bir şey öğren."
+
+Latin: "Audentes Fortuna Iuvat"
+Aciklama: "Şans cesur olanlara yardım eder. Cesur olanlar şansı yakalar. Risk almaktan korkma, cesur ol."
+
+Latin: "Non Scholae, Sed Vitae Discimus"
+Aciklama: "Okul için değil, yaşam için öğreniyoruz. Öğrenmenin amacı sadece sınav değil, hayatı daha iyi yaşamaktır."
+
+Latin: "Tempora Mutantur, Nos Et Mutamur In Illis"
+Aciklama: "Zamanlar değişir, biz de onlarla değişiriz. Değişim kaçınılmazdır. Zamanla birlikte sen de değişmelisin."
+
+Latin: "Veritas Vincit"
+Aciklama: "Hakikat kazanır. Gerçek her zaman ortaya çıkar. Dürüst ol ve doğruyu söyle. Yalan geçicidir."
+
+Latin: "Amor Vincit Omnia"
+Aciklama: "Aşk her şeyi yener. Sevgi en güçlü duygudur. Sevgiyle her zorluğu aşabilirsin. Kalbini dinle."
+
+Latin: "Acta Non Verba"
+Aciklama: "Söz değil, eylem. Konuşmak yerine yap. Eylemler sözlerden daha güçlüdür. Harekete geç."
+
+Latin: "Fortuna Favet Fortibus"
+Aciklama: "Şans güçlülere yardım eder. Güçlü olanlar şansı yakalar. Kendini geliştir ve güçlü ol."
+
+Latin: "Gutta Cavat Lapidem"
+Aciklama: "Damla taşı deler. Küçük adımlar büyük değişiklikler yaratır. Sabırlı ol ve devam et."
+
+Latin: "In Vino Veritas"
+Aciklama: "Şarapta gerçek. Bazen gerçekler beklenmedik yerlerde ortaya çıkar. Açık fikirli ol."
+
+Latin: "Labor Omnia Vincit"
+Aciklama: "Çalışma her şeyi yener. Çalışmak başarının anahtarıdır. Azimle çalış ve hedeflerine ulaş." 

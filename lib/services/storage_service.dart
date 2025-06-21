@@ -1,88 +1,96 @@
-import 'dart:async';
-import 'package:path/path.dart';
+import 'dart:convert';
+import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
 import '../models/note.dart';
-import '../utils/encryption.dart';
 
-/// Service responsible for local data storage.
+/// Service responsible for local data storage using JSON files.
 class StorageService {
-  static const _dbName = 'notes.db';
-  static const _dbVersion = 1;
-  static const _tableName = 'notes';
-
   static final StorageService instance = StorageService._internal();
-  Database? _database;
-
   StorageService._internal();
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+  static const String _notesFileName = 'notes.json';
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
   }
 
-  Future<Database> _initDatabase() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final path = join(dir.path, _dbName);
-    return openDatabase(
-      path,
-      version: _dbVersion,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE $_tableName(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            content TEXT,
-            created_at TEXT
-          )
-        ''');
-      },
-    );
-  }
-
-  Future<int> insertNote(Note note) async {
-    final db = await database;
-    // Encrypt content before saving.
-    final encrypted = Encryption.encrypt(note.content);
-    return db.insert(_tableName, note.copyWith(content: encrypted).toMap());
-  }
-
-  Future<int> updateNote(Note note) async {
-    final db = await database;
-    final encrypted = Encryption.encrypt(note.content);
-    return db.update(
-      _tableName,
-      note.copyWith(content: encrypted).toMap(),
-      where: 'id = ?',
-      whereArgs: [note.id],
-    );
-  }
-
-  Future<int> deleteNote(int id) async {
-    final db = await database;
-    return db.delete(_tableName, where: 'id = ?', whereArgs: [id]);
+  Future<File> get _notesFile async {
+    final path = await _localPath;
+    return File('$path/$_notesFileName');
   }
 
   Future<List<Note>> fetchNotes() async {
-    final db = await database;
-    final maps = await db.query(_tableName, orderBy: 'created_at DESC');
-    return [
-      for (final m in maps)
-        Note.fromMap(m).copyWith(
-          content: Encryption.decrypt(m['content'] as String),
-        )
-    ];
-  }
-}
+    try {
+      final file = await _notesFile;
+      if (!await file.exists()) {
+        return [];
+      }
 
-extension on Note {
-  Note copyWith({int? id, String? title, String? content, DateTime? createdAt}) {
-    return Note(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      content: content ?? this.content,
-      createdAt: createdAt ?? this.createdAt,
-    );
+      final String contents = await file.readAsString();
+      final List<dynamic> jsonList = json.decode(contents);
+      
+      return jsonList.map((json) => Note.fromMap(json)).toList();
+    } catch (e) {
+      print('Error loading notes: $e');
+      return [];
+    }
+  }
+
+  Future<int> insertNote(Note note) async {
+    try {
+      final notes = await fetchNotes();
+      final maxId = notes.isEmpty 
+          ? 0 
+          : notes.map((n) => n.id ?? 0).reduce((a, b) => a > b ? a : b);
+      final newNote = note.copyWith(id: maxId + 1);
+      
+      notes.add(newNote);
+      await _saveNotes(notes);
+      
+      return newNote.id ?? 0;
+    } catch (e) {
+      print('Error inserting note: $e');
+      return -1;
+    }
+  }
+
+  Future<int> updateNote(Note note) async {
+    try {
+      final notes = await fetchNotes();
+      final index = notes.indexWhere((n) => n.id == note.id);
+      
+      if (index != -1) {
+        notes[index] = note;
+        await _saveNotes(notes);
+        return 1;
+      }
+      return 0;
+    } catch (e) {
+      print('Error updating note: $e');
+      return 0;
+    }
+  }
+
+  Future<int> deleteNote(int id) async {
+    try {
+      final notes = await fetchNotes();
+      notes.removeWhere((note) => note.id == id);
+      await _saveNotes(notes);
+      return 1;
+    } catch (e) {
+      print('Error deleting note: $e');
+      return 0;
+    }
+  }
+
+  Future<void> _saveNotes(List<Note> notes) async {
+    try {
+      final file = await _notesFile;
+      final jsonList = notes.map((note) => note.toMap()).toList();
+      await file.writeAsString(json.encode(jsonList));
+    } catch (e) {
+      print('Error saving notes: $e');
+    }
   }
 }

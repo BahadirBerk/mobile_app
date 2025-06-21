@@ -9,14 +9,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   provider: ^6.1.1
-  sqflite: ^2.3.3
   path_provider: ^2.1.2
   path: ^1.8.3
   http: ^1.1.2
   crypto: ^3.0.3
   flutter_quill: ^11.4.1
   flutter_lints: ^2.0.0
+  shared_preferences: ^2.2.2
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -28,3 +31,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/
+    - assets/latin.txt
