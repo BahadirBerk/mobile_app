@@ -29,6 +29,7 @@ class _NotesListScreenState extends State<NotesListScreen>
   late Animation<double> _buttonScaleAnimation;
   late Animation<double> _themeRotationAnimation;
   int _currentNavIndex = 1; // Default to notes tab
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -203,69 +204,37 @@ class _NotesListScreenState extends State<NotesListScreen>
     final themeProvider = context.watch<ThemeProvider>();
     final userName = user != null ? user.split('@')[0] : 'Kullanıcı';
 
-    return Scaffold(
-      backgroundColor: themeProvider.backgroundColor,
-      drawer: const ProfileDrawer(),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: Column(
-            children: [
-              // Top Section with Profile Icon and Title
-              Container(
-                padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-                decoration: BoxDecoration(
-                  gradient: themeProvider.primaryGradient,
-                ),
-                child: Column(
-                  children: [
-                    // Top Row with Profile Icon and Theme Toggle
-                    Row(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 500),
+      color: themeProvider.backgroundColor,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        key: _scaffoldKey,
+        drawer: const ProfileDrawer(),
+        body: SafeArea(
+          child: FadeTransition(
+            opacity: _fadeAnimation,
+            child: SlideTransition(
+              position: _slideAnimation,
+              child: Column(
+                children: [
+                  // Top Section with Profile Icon and Title
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+                    decoration: BoxDecoration(
+                      gradient: themeProvider.primaryGradient,
+                    ),
+                    child: Column(
                       children: [
-                        // Profile Icon (Drawer Trigger)
-                        Builder(
-                          builder: (context) => GestureDetector(
-                            onTap: () {
-                              Scaffold.of(context).openDrawer();
-                            },
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
-                                  width: 2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.person,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                        
-                        const Spacer(),
-                        
-                        // Theme Toggle Button
-                        AnimatedBuilder(
-                          animation: _themeAnimationController,
-                          builder: (context, child) {
-                            return Transform.rotate(
-                              angle: _themeRotationAnimation.value * 0.5 * 3.14159,
-                              child: GestureDetector(
-                                onTap: _toggleTheme,
+                        // Top Row with Profile Icon and Theme Toggle
+                        Row(
+                          children: [
+                            // Profile Icon (Drawer Trigger)
+                            Builder(
+                              builder: (context) => GestureDetector(
+                                onTap: () {
+                                  Scaffold.of(context).openDrawer();
+                                },
                                 child: Container(
                                   width: 50,
                                   height: 50,
@@ -284,197 +253,236 @@ class _NotesListScreenState extends State<NotesListScreen>
                                       ),
                                     ],
                                   ),
-                                  child: Icon(
-                                    themeProvider.isDarkMode 
-                                        ? Icons.wb_sunny 
-                                        : Icons.nightlight_round,
+                                  child: const Icon(
+                                    Icons.person,
                                     color: Colors.white,
                                     size: 24,
                                   ),
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    
-                    // Title with simple design
-                    Text(
-                      'Brainy Note',
-                      style: const TextStyle(
-                        fontSize: 38,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 2.0,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    
-                    // Welcome Message
-                    Text(
-                      'Hoş geldin $userName',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Bugün ${_getCurrentDate()}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Main Content
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      // Action Buttons with enhanced animations
-                      AnimatedBuilder(
-                        animation: _buttonAnimationController,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: _buttonScaleAnimation.value,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                NeumorphicButton(
-                                  title: 'Yeni Not',
-                                  icon: Icons.edit_note,
-                                  onPressed: _createNewNote,
-                                  color: themeProvider.primaryColor,
-                                ),
-                                NeumorphicButton(
-                                  title: 'Yeni Görev',
-                                  icon: Icons.task_alt,
-                                  onPressed: _createNewTask,
-                                  color: themeProvider.secondaryColor,
-                                ),
-                              ],
                             ),
-                          );
-                        },
-                      ),
-                      
-                      const SizedBox(height: 30),
-                      
-                      // Daily Quote
-                      Padding(
-                        padding: const EdgeInsets.only(top: 24, bottom: 16),
-                        child: Flexible(
-                          child: DailyQuoteWidget(),
-                        ),
-                      ),
-                      
-                      const SizedBox(height: 30),
-                      
-                      // Notes Section (if any notes exist)
-                      if (notes.isNotEmpty) ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Son Notlar',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: themeProvider.primaryColor,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                // Show all notes
+                            
+                            const Spacer(),
+                            
+                            // Theme Toggle Button
+                            AnimatedBuilder(
+                              animation: _themeAnimationController,
+                              builder: (context, child) {
+                                return Transform.rotate(
+                                  angle: _themeRotationAnimation.value * 0.5 * 3.14159,
+                                  child: GestureDetector(
+                                    onTap: _toggleTheme,
+                                    child: Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white.withOpacity(0.3),
+                                          width: 2,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            blurRadius: 10,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Icon(
+                                        themeProvider.isDarkMode 
+                                            ? Icons.wb_sunny 
+                                            : Icons.nightlight_round,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                    ),
+                                  ),
+                                );
                               },
-                              child: Text(
-                                'Tümünü Gör',
-                                style: TextStyle(
-                                  color: themeProvider.primaryColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                         
-                        // Recent Notes
-                        ...notes.take(3).map((note) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: NoteCardWidget(
-                            note: note,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                PageRouteBuilder(
-                                  pageBuilder: (context, animation, secondaryAnimation) => NoteDetailScreen(note: note),
-                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                    const begin = Offset(1.0, 0.0);
-                                    const end = Offset.zero;
-                                    const curve = Curves.easeOutCubic;
-                                    var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                                    var offsetAnimation = animation.drive(tween);
-                                    return SlideTransition(position: offsetAnimation, child: child);
-                                  },
-                                  transitionDuration: const Duration(milliseconds: 1000),
-                                ),
-                              );
-                            },
-                            onDelete: () async {
-                              final confirmed = await showDialog<bool>(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('Notu Sil'),
-                                  content: const Text('Bu notu silmek istediğinizden emin misiniz?'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(false),
-                                      child: const Text('İptal'),
+                        // Title with simple design
+                        Text(
+                          'Brainy Note',
+                          style: const TextStyle(
+                            fontSize: 38,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 2.0,
+                            fontFamily: 'Roboto',
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        
+                        // Welcome Message
+                        Text(
+                          'Hoş geldin $userName',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Bugün ${_getCurrentDate()}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Main Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          // Action Buttons with enhanced animations
+                          AnimatedBuilder(
+                            animation: _buttonAnimationController,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _buttonScaleAnimation.value,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    NeumorphicButton(
+                                      title: 'Yeni Not',
+                                      icon: Icons.edit_note,
+                                      onPressed: _createNewNote,
+                                      color: themeProvider.primaryColor,
                                     ),
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.of(context).pop(true),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: themeProvider.accentColor,
-                                        foregroundColor: Colors.white,
-                                      ),
-                                      child: const Text('Sil'),
+                                    NeumorphicButton(
+                                      title: 'Yeni Görev',
+                                      icon: Icons.task_alt,
+                                      onPressed: _createNewTask,
+                                      color: themeProvider.secondaryColor,
                                     ),
                                   ],
                                 ),
                               );
-
-                              if (confirmed == true) {
-                                await context.read<NotesProvider>().deleteNote(note);
-                              }
                             },
                           ),
-                        )),
-                      ],
-                    ],
+                          
+                          const SizedBox(height: 30),
+                          
+                          // Daily Quote
+                          Padding(
+                            padding: const EdgeInsets.only(top: 24, bottom: 16),
+                            child: Flexible(
+                              child: DailyQuoteWidget(),
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 30),
+                          
+                          // Notes Section (if any notes exist)
+                          if (notes.isNotEmpty) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Son Notlar',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: themeProvider.primaryColor,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    // Show all notes
+                                  },
+                                  child: Text(
+                                    'Tümünü Gör',
+                                    style: TextStyle(
+                                      color: themeProvider.primaryColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // Recent Notes
+                            ...notes.take(3).map((note) => Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: NoteCardWidget(
+                                note: note,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    PageRouteBuilder(
+                                      pageBuilder: (context, animation, secondaryAnimation) => NoteDetailScreen(note: note),
+                                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                        const begin = Offset(1.0, 0.0);
+                                        const end = Offset.zero;
+                                        const curve = Curves.easeOutCubic;
+                                        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+                                        var offsetAnimation = animation.drive(tween);
+                                        return SlideTransition(position: offsetAnimation, child: child);
+                                      },
+                                      transitionDuration: const Duration(milliseconds: 1000),
+                                    ),
+                                  );
+                                },
+                                onDelete: () async {
+                                  final confirmed = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: const Text('Notu Sil'),
+                                      content: const Text('Bu notu silmek istediğinizden emin misiniz?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(context).pop(false),
+                                          child: const Text('İptal'),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () => Navigator.of(context).pop(true),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: themeProvider.accentColor,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          child: const Text('Sil'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (confirmed == true) {
+                                    await context.read<NotesProvider>().deleteNote(note);
+                                  }
+                                },
+                              ),
+                            )),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
-      
-      // Bottom Navigation
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: _currentNavIndex,
-        onTap: _onNavTap,
-        primaryColor: themeProvider.primaryColor,
-        secondaryColor: themeProvider.secondaryColor,
+        
+        // Bottom Navigation
+        bottomNavigationBar: CustomBottomNav(
+          currentIndex: _currentNavIndex,
+          onTap: _onNavTap,
+          primaryColor: themeProvider.primaryColor,
+          secondaryColor: themeProvider.secondaryColor,
+        ),
       ),
     );
   }
