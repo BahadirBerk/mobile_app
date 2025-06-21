@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class CustomBottomNav extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final Color primaryColor;
+  final Color secondaryColor;
 
   const CustomBottomNav({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    required this.primaryColor,
+    required this.secondaryColor,
   });
 
   @override
@@ -123,12 +127,12 @@ class _CustomBottomNavState extends State<CustomBottomNav>
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected 
-              ? const Color(0xFF2E8B57).withOpacity(0.15)
+              ? widget.primaryColor.withOpacity(0.15)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(25),
           boxShadow: isSelected ? [
             BoxShadow(
-              color: const Color(0xFF2E8B57).withOpacity(0.3),
+              color: widget.primaryColor.withOpacity(0.3),
               blurRadius: 15,
               offset: const Offset(0, 4),
             ),
@@ -143,12 +147,12 @@ class _CustomBottomNavState extends State<CustomBottomNav>
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: isSelected 
-                    ? const Color(0xFF2E8B57)
+                    ? widget.primaryColor
                     : Colors.transparent,
                 shape: BoxShape.circle,
                 boxShadow: isSelected ? [
                   BoxShadow(
-                    color: const Color(0xFF2E8B57).withOpacity(0.4),
+                    color: widget.primaryColor.withOpacity(0.4),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -169,7 +173,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                 fontSize: isSelected ? 13 : 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
                 color: isSelected 
-                    ? const Color(0xFF2E8B57)
+                    ? widget.primaryColor
                     : Colors.grey[600],
               ),
               child: Text(label),

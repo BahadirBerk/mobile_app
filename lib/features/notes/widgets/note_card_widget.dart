@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../models/note.dart';
+import '../../../theme/theme_provider.dart';
 
 class NoteCardWidget extends StatefulWidget {
   final Note note;
@@ -121,6 +123,8 @@ class _NoteCardWidgetState extends State<NoteCardWidget>
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    
     return MouseRegion(
       onEnter: (_) => _handleHover(true),
       onExit: (_) => _handleHover(false),
@@ -142,8 +146,12 @@ class _NoteCardWidgetState extends State<NoteCardWidget>
                     return Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: themeProvider.cardColor,
                         borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: themeProvider.borderColor.withOpacity(0.3),
+                          width: 1,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.08 * _elevationAnimation.value),
@@ -156,7 +164,7 @@ class _NoteCardWidgetState extends State<NoteCardWidget>
                             offset: Offset(0, 3 * _elevationAnimation.value),
                           ),
                           BoxShadow(
-                            color: const Color(0xFF2E8B57).withOpacity(0.05 * _elevationAnimation.value),
+                            color: themeProvider.primaryColor.withOpacity(0.05 * _elevationAnimation.value),
                             blurRadius: 20 * _elevationAnimation.value,
                             offset: const Offset(0, 0),
                           ),
@@ -180,10 +188,10 @@ class _NoteCardWidgetState extends State<NoteCardWidget>
                                         widget.note.title.isEmpty 
                                             ? 'Başlıksız Not' 
                                             : widget.note.title,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold,
-                                          color: Color(0xFF2E8B57),
+                                          color: themeProvider.primaryColor,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -192,113 +200,48 @@ class _NoteCardWidgetState extends State<NoteCardWidget>
                                     if (widget.onDelete != null)
                                       Container(
                                         decoration: BoxDecoration(
-                                          color: Colors.red.withOpacity(0.1),
+                                          color: themeProvider.accentColor.withOpacity(0.1),
                                           shape: BoxShape.circle,
                                         ),
                                         child: IconButton(
                                           onPressed: widget.onDelete,
-                                          icon: const Icon(
+                                          icon: Icon(
                                             Icons.delete_outline,
-                                            color: Colors.red,
+                                            color: themeProvider.accentColor,
                                             size: 20,
                                           ),
                                           padding: const EdgeInsets.all(8),
-                                          constraints: const BoxConstraints(),
+                                          constraints: const BoxConstraints(
+                                            minWidth: 36,
+                                            minHeight: 36,
+                                          ),
                                         ),
                                       ),
                                   ],
                                 ),
                                 const SizedBox(height: 8),
                                 
-                                // Time ago with enhanced styling
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2E8B57).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    _getTimeAgo(),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: const Color(0xFF2E8B57),
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                // Time ago
+                                Text(
+                                  _getTimeAgo(),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: themeProvider.textSecondaryColor,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 const SizedBox(height: 16),
                                 
-                                // Content preview with enhanced styling
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF8F9FA),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: const Color(0xFF2E8B57).withOpacity(0.1),
-                                      width: 1,
-                                    ),
+                                // Content preview
+                                Text(
+                                  _getPreviewText(),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: themeProvider.textColor,
+                                    height: 1.4,
                                   ),
-                                  child: Text(
-                                    _getPreviewText(),
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.grey[800],
-                                      height: 1.5,
-                                    ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                
-                                // Footer with icon and gradient line
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF2E8B57).withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.edit_note,
-                                            color: const Color(0xFF2E8B57),
-                                            size: 16,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'Not',
-                                            style: TextStyle(
-                                              color: const Color(0xFF2E8B57),
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Container(
-                                      width: 40,
-                                      height: 3,
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            Color(0xFF2E8B57),
-                                            Color(0xFF20B2AA),
-                                          ],
-                                        ),
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    ),
-                                  ],
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),

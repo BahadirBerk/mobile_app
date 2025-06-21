@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '../providers/notes_provider.dart';
 import '../../../models/note.dart';
+import '../../../theme/theme_provider.dart';
 import '../widgets/note_editor.dart';
 
 class NoteDetailScreen extends StatefulWidget {
@@ -13,9 +14,14 @@ class NoteDetailScreen extends StatefulWidget {
   State<NoteDetailScreen> createState() => _NoteDetailScreenState();
 }
 
-class _NoteDetailScreenState extends State<NoteDetailScreen> {
+class _NoteDetailScreenState extends State<NoteDetailScreen>
+    with TickerProviderStateMixin {
   late TextEditingController _titleController;
   late quill.QuillController _controller;
+  late AnimationController _slideController;
+  late AnimationController _fadeController;
+  late Animation<double> _slideAnimation;
+  late Animation<double> _fadeAnimation;
   bool _isSaving = false;
 
   @override
@@ -28,12 +34,50 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             document: quill.Document()..insert(0, widget.note!.content),
             selection: const TextSelection.collapsed(offset: 0),
           );
+    
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    
+    _slideAnimation = Tween<double>(
+      begin: 100.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _slideController,
+      curve: Curves.easeOutCubic,
+    ));
+    
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeIn,
+    ));
+    
+    _startAnimations();
+  }
+
+  void _startAnimations() async {
+    await Future.delayed(const Duration(milliseconds: 200));
+    _slideController.forward();
+    
+    await Future.delayed(const Duration(milliseconds: 300));
+    _fadeController.forward();
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _controller.dispose();
+    _slideController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
@@ -48,6 +92,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       final content = _controller.document.toPlainText();
       final now = DateTime.now();
       final provider = context.read<NotesProvider>();
+      final themeProvider = context.read<ThemeProvider>();
 
       if (widget.note == null) {
         // Create new note
@@ -61,9 +106,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Not başarıyla kaydedildi!'),
-              backgroundColor: Color(0xFF2E8B57),
+            SnackBar(
+              content: const Text('Not başarıyla kaydedildi!'),
+              backgroundColor: themeProvider.primaryColor,
             ),
           );
         }
@@ -78,9 +123,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Not başarıyla güncellendi!'),
-              backgroundColor: Color(0xFF2E8B57),
+            SnackBar(
+              content: const Text('Not başarıyla güncellendi!'),
+              backgroundColor: themeProvider.primaryColor,
             ),
           );
         }
@@ -109,6 +154,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
   }
 
   Future<void> _deleteNote() async {
+    final themeProvider = context.read<ThemeProvider>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -122,7 +168,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: themeProvider.accentColor,
               foregroundColor: Colors.white,
             ),
             child: const Text('Sil'),
@@ -136,9 +182,9 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Not başarıyla silindi!'),
-            backgroundColor: Color(0xFF2E8B57),
+          SnackBar(
+            content: const Text('Not başarıyla silindi!'),
+            backgroundColor: themeProvider.primaryColor,
           ),
         );
       }
@@ -147,15 +193,19 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: themeProvider.backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2E8B57),
+        backgroundColor: themeProvider.primaryColor,
         foregroundColor: Colors.white,
+        elevation: 0,
         title: Text(
           widget.note == null ? 'Yeni Not' : 'Notu Düzenle',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
         actions: [
@@ -179,44 +229,95 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Title Field
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+      body: AnimatedBuilder(
+        animation: _slideController,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(0, _slideAnimation.value),
+            child: Opacity(
+              opacity: _fadeAnimation.value,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: themeProvider.backgroundGradient,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Title Field - Minimalist Design
+                        Container(
+                          decoration: BoxDecoration(
+                            color: themeProvider.cardColor,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: themeProvider.borderColor,
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: TextField(
+                            controller: _titleController,
+                            decoration: InputDecoration(
+                              hintText: 'Not başlığı...',
+                              hintStyle: TextStyle(
+                                color: themeProvider.textSecondaryColor,
+                                fontSize: 16,
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: const EdgeInsets.all(20),
+                              prefixIcon: Icon(
+                                Icons.title,
+                                color: themeProvider.primaryColor,
+                                size: 20,
+                              ),
+                            ),
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: themeProvider.textColor,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Note Editor - Scrollable
+                        Container(
+                          height: 350,
+                          decoration: BoxDecoration(
+                            color: themeProvider.cardColor,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: themeProvider.borderColor,
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: NoteEditor(controller: _controller),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-              child: TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  hintText: 'Not başlığı...',
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.all(16),
-                ),
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            
-            // Note Editor
-            Expanded(
-              child: NoteEditor(controller: _controller),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

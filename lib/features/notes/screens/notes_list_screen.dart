@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/notes_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../theme/theme_provider.dart';
 import '../widgets/note_card_widget.dart';
 import '../widgets/neumorphic_button.dart';
 import '../widgets/custom_bottom_nav.dart';
@@ -22,9 +23,11 @@ class _NotesListScreenState extends State<NotesListScreen>
     with TickerProviderStateMixin {
   late AnimationController _animationController;
   late AnimationController _buttonAnimationController;
+  late AnimationController _themeAnimationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _buttonScaleAnimation;
+  late Animation<double> _themeRotationAnimation;
   int _currentNavIndex = 1; // Default to notes tab
 
   @override
@@ -37,6 +40,11 @@ class _NotesListScreenState extends State<NotesListScreen>
     
     _buttonAnimationController = AnimationController(
       duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    
+    _themeAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     
@@ -64,6 +72,14 @@ class _NotesListScreenState extends State<NotesListScreen>
       curve: Curves.easeOutCubic,
     ));
     
+    _themeRotationAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _themeAnimationController,
+      curve: Curves.easeInOut,
+    ));
+    
     _animationController.forward();
     
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -75,7 +91,16 @@ class _NotesListScreenState extends State<NotesListScreen>
   void dispose() {
     _animationController.dispose();
     _buttonAnimationController.dispose();
+    _themeAnimationController.dispose();
     super.dispose();
+  }
+
+  void _toggleTheme() {
+    final themeProvider = context.read<ThemeProvider>();
+    themeProvider.toggleTheme();
+    _themeAnimationController.forward().then((_) {
+      _themeAnimationController.reset();
+    });
   }
 
   void _openDailyQuote() {
@@ -136,7 +161,7 @@ class _NotesListScreenState extends State<NotesListScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Görev oluşturma özelliği yakında eklenecek!'),
-        backgroundColor: const Color(0xFF2E8B57),
+        backgroundColor: context.read<ThemeProvider>().primaryColor,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -175,10 +200,11 @@ class _NotesListScreenState extends State<NotesListScreen>
   Widget build(BuildContext context) {
     final notes = context.watch<NotesProvider>().notes;
     final user = context.watch<AuthProvider>().currentUser;
+    final themeProvider = context.watch<ThemeProvider>();
     final userName = user != null ? user.split('@')[0] : 'Kullanıcı';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: themeProvider.backgroundColor,
       drawer: const ProfileDrawer(),
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -189,20 +215,12 @@ class _NotesListScreenState extends State<NotesListScreen>
               // Top Section with Profile Icon and Title
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF2E8B57),
-                      Color(0xFF20B2AA),
-                      Color(0xFF48CAE4),
-                    ],
-                  ),
+                decoration: BoxDecoration(
+                  gradient: themeProvider.primaryGradient,
                 ),
                 child: Column(
                   children: [
-                    // Top Row with Profile Icon
+                    // Top Row with Profile Icon and Theme Toggle
                     Row(
                       children: [
                         // Profile Icon (Drawer Trigger)
@@ -237,14 +255,55 @@ class _NotesListScreenState extends State<NotesListScreen>
                             ),
                           ),
                         ),
+                        
+                        const Spacer(),
+                        
+                        // Theme Toggle Button
+                        AnimatedBuilder(
+                          animation: _themeAnimationController,
+                          builder: (context, child) {
+                            return Transform.rotate(
+                              angle: _themeRotationAnimation.value * 0.5 * 3.14159,
+                              child: GestureDetector(
+                                onTap: _toggleTheme,
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.3),
+                                      width: 2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    themeProvider.isDarkMode 
+                                        ? Icons.wb_sunny 
+                                        : Icons.nightlight_round,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
                     
                     // Title with simple design
-                    const Text(
+                    Text(
                       'Brainy Note',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 38,
                         fontWeight: FontWeight.w900,
                         color: Colors.white,
@@ -294,13 +353,13 @@ class _NotesListScreenState extends State<NotesListScreen>
                                   title: 'Yeni Not',
                                   icon: Icons.edit_note,
                                   onPressed: _createNewNote,
-                                  color: const Color(0xFF2E8B57),
+                                  color: themeProvider.primaryColor,
                                 ),
                                 NeumorphicButton(
                                   title: 'Yeni Görev',
                                   icon: Icons.task_alt,
                                   onPressed: _createNewTask,
-                                  color: const Color(0xFF20B2AA),
+                                  color: themeProvider.secondaryColor,
                                 ),
                               ],
                             ),
@@ -310,8 +369,13 @@ class _NotesListScreenState extends State<NotesListScreen>
                       
                       const SizedBox(height: 30),
                       
-                      // Daily Quote Widget
-                      const DailyQuoteWidget(),
+                      // Daily Quote
+                      Padding(
+                        padding: const EdgeInsets.only(top: 24, bottom: 16),
+                        child: Flexible(
+                          child: DailyQuoteWidget(),
+                        ),
+                      ),
                       
                       const SizedBox(height: 30),
                       
@@ -320,22 +384,22 @@ class _NotesListScreenState extends State<NotesListScreen>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               'Son Notlar',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF2E8B57),
+                                color: themeProvider.primaryColor,
                               ),
                             ),
                             TextButton(
                               onPressed: () {
                                 // Show all notes
                               },
-                              child: const Text(
+                              child: Text(
                                 'Tümünü Gör',
                                 style: TextStyle(
-                                  color: Color(0xFF2E8B57),
+                                  color: themeProvider.primaryColor,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -380,7 +444,7 @@ class _NotesListScreenState extends State<NotesListScreen>
                                     ElevatedButton(
                                       onPressed: () => Navigator.of(context).pop(true),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
+                                        backgroundColor: themeProvider.accentColor,
                                         foregroundColor: Colors.white,
                                       ),
                                       child: const Text('Sil'),
@@ -404,9 +468,13 @@ class _NotesListScreenState extends State<NotesListScreen>
           ),
         ),
       ),
+      
+      // Bottom Navigation
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _currentNavIndex,
         onTap: _onNavTap,
+        primaryColor: themeProvider.primaryColor,
+        secondaryColor: themeProvider.secondaryColor,
       ),
     );
   }

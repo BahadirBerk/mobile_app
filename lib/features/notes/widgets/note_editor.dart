@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:provider/provider.dart';
+import '../../../theme/theme_provider.dart';
 
 class NoteEditor extends StatefulWidget {
   final quill.QuillController controller;
@@ -22,12 +24,14 @@ class _NoteEditorState extends State<NoteEditor> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: themeProvider.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: const Color(0xFF2E8B57).withOpacity(0.2),
+          color: themeProvider.borderColor.withOpacity(0.3),
           width: 1,
         ),
         boxShadow: [
@@ -44,14 +48,14 @@ class _NoteEditorState extends State<NoteEditor> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FA),
+              color: themeProvider.surfaceColor,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
               ),
               border: Border(
                 bottom: BorderSide(
-                  color: const Color(0xFF2E8B57).withOpacity(0.1),
+                  color: themeProvider.borderColor.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -65,6 +69,7 @@ class _NoteEditorState extends State<NoteEditor> {
                   onPressed: () {
                     widget.controller.formatSelection(quill.Attribute.bold);
                   },
+                  themeProvider: themeProvider,
                 ),
                 const SizedBox(width: 8),
                 
@@ -75,6 +80,7 @@ class _NoteEditorState extends State<NoteEditor> {
                   onPressed: () {
                     widget.controller.formatSelection(quill.Attribute.italic);
                   },
+                  themeProvider: themeProvider,
                 ),
                 const SizedBox(width: 8),
                 
@@ -85,6 +91,7 @@ class _NoteEditorState extends State<NoteEditor> {
                   onPressed: () {
                     widget.controller.formatSelection(quill.Attribute.ul);
                   },
+                  themeProvider: themeProvider,
                 ),
                 const SizedBox(width: 8),
                 
@@ -95,6 +102,7 @@ class _NoteEditorState extends State<NoteEditor> {
                   onPressed: () {
                     widget.controller.formatSelection(quill.Attribute.checked);
                   },
+                  themeProvider: themeProvider,
                 ),
               ],
             ),
@@ -126,16 +134,17 @@ class _NoteEditorState extends State<NoteEditor> {
     required IconData icon,
     required bool isActive,
     required VoidCallback onPressed,
+    required ThemeProvider themeProvider,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: isActive 
-            ? const Color(0xFF2E8B57).withOpacity(0.1)
+            ? themeProvider.primaryColor.withOpacity(0.1)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: isActive 
-              ? const Color(0xFF2E8B57)
+              ? themeProvider.primaryColor
               : Colors.transparent,
           width: 1,
         ),
@@ -146,8 +155,8 @@ class _NoteEditorState extends State<NoteEditor> {
           icon,
           size: 20,
           color: isActive 
-              ? const Color(0xFF2E8B57)
-              : Colors.grey[600],
+              ? themeProvider.primaryColor
+              : themeProvider.textSecondaryColor,
         ),
         padding: const EdgeInsets.all(8),
         constraints: const BoxConstraints(

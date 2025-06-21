@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../theme/theme_provider.dart';
+import '../../auth/screens/login_screen.dart';
 
 class ProfileDrawer extends StatelessWidget {
   const ProfileDrawer({super.key});
@@ -8,20 +10,13 @@ class ProfileDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().currentUser;
+    final themeProvider = context.watch<ThemeProvider>();
     final userName = user != null ? user.split('@')[0] : 'Kullanıcı';
 
     return Drawer(
       child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF2E8B57),
-              Color(0xFF20B2AA),
-              Color(0xFF48CAE4),
-            ],
-          ),
+        decoration: BoxDecoration(
+          gradient: themeProvider.primaryGradient,
         ),
         child: Column(
           children: [
@@ -41,6 +36,13 @@ class ProfileDrawer extends StatelessWidget {
                         color: Colors.white.withOpacity(0.3),
                         width: 3,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: const Icon(
                       Icons.person,
@@ -76,9 +78,9 @@ class ProfileDrawer extends StatelessWidget {
             // Menu Items
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
+                decoration: BoxDecoration(
+                  color: themeProvider.cardColor,
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
                   ),
@@ -95,12 +97,13 @@ class ProfileDrawer extends StatelessWidget {
                         Navigator.pop(context);
                         // TODO: Navigate to profile settings
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Profil ayarları yakında eklenecek!'),
-                            backgroundColor: Color(0xFF2E8B57),
+                          SnackBar(
+                            content: const Text('Profil ayarları yakında eklenecek!'),
+                            backgroundColor: themeProvider.primaryColor,
                           ),
                         );
                       },
+                      themeProvider: themeProvider,
                     ),
                     
                     _buildMenuItem(
@@ -110,12 +113,13 @@ class ProfileDrawer extends StatelessWidget {
                         Navigator.pop(context);
                         // TODO: Navigate to app settings
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Uygulama ayarları yakında eklenecek!'),
-                            backgroundColor: Color(0xFF2E8B57),
+                          SnackBar(
+                            content: const Text('Uygulama ayarları yakında eklenecek!'),
+                            backgroundColor: themeProvider.primaryColor,
                           ),
                         );
                       },
+                      themeProvider: themeProvider,
                     ),
                     
                     _buildMenuItem(
@@ -125,12 +129,13 @@ class ProfileDrawer extends StatelessWidget {
                         Navigator.pop(context);
                         // TODO: Navigate to help
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Yardım sayfası yakında eklenecek!'),
-                            backgroundColor: Color(0xFF2E8B57),
+                          SnackBar(
+                            content: const Text('Yardım sayfası yakında eklenecek!'),
+                            backgroundColor: themeProvider.primaryColor,
                           ),
                         );
                       },
+                      themeProvider: themeProvider,
                     ),
                     
                     _buildMenuItem(
@@ -140,12 +145,13 @@ class ProfileDrawer extends StatelessWidget {
                         Navigator.pop(context);
                         // TODO: Navigate to about
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Hakkında sayfası yakında eklenecek!'),
-                            backgroundColor: Color(0xFF2E8B57),
+                          SnackBar(
+                            content: const Text('Hakkında sayfası yakında eklenecek!'),
+                            backgroundColor: themeProvider.primaryColor,
                           ),
                         );
                       },
+                      themeProvider: themeProvider,
                     ),
                     
                     const Spacer(),
@@ -156,18 +162,29 @@ class ProfileDrawer extends StatelessWidget {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                          Navigator.pop(context);
-                          await _showLogoutDialog(context);
+                          final authProvider = context.read<AuthProvider>();
+                          final navigator = Navigator.of(context);
+                          
+                          final confirmed = await _showLogoutDialog(context);
+                          
+                          if (confirmed == true) {
+                            await authProvider.logout();
+                            navigator.pushAndRemoveUntil(
+                              MaterialPageRoute(builder: (context) => const LoginScreen()),
+                              (route) => false,
+                            );
+                          }
                         },
                         icon: const Icon(Icons.logout),
                         label: const Text('Çıkış Yap'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2E8B57),
+                          backgroundColor: themeProvider.accentColor,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
+                          elevation: 2,
                         ),
                       ),
                     ),
@@ -185,17 +202,18 @@ class ProfileDrawer extends StatelessWidget {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    required ThemeProvider themeProvider,
   }) {
     return ListTile(
       leading: Icon(
         icon,
-        color: const Color(0xFF2E8B57),
+        color: themeProvider.primaryColor,
         size: 24,
       ),
       title: Text(
         title,
-        style: const TextStyle(
-          color: Color(0xFF2E8B57),
+        style: TextStyle(
+          color: themeProvider.textColor,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -204,8 +222,9 @@ class ProfileDrawer extends StatelessWidget {
     );
   }
 
-  Future<void> _showLogoutDialog(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+  Future<bool?> _showLogoutDialog(BuildContext context) async {
+    final themeProvider = context.read<ThemeProvider>();
+    return await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Çıkış Yap'),
@@ -218,7 +237,7 @@ class ProfileDrawer extends StatelessWidget {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2E8B57),
+              backgroundColor: themeProvider.accentColor,
               foregroundColor: Colors.white,
             ),
             child: const Text('Çıkış Yap'),
@@ -226,9 +245,5 @@ class ProfileDrawer extends StatelessWidget {
         ],
       ),
     );
-
-    if (confirmed == true) {
-      await context.read<AuthProvider>().logout();
-    }
   }
 } 

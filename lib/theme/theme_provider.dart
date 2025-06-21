@@ -5,72 +5,74 @@ class ThemeProvider extends ChangeNotifier {
   
   bool get isDarkMode => _isDarkMode;
   
-  // Neumorphism Color Palette
-  static const Color lightBackground = Color(0xFFF4F2F8);
-  static const Color lightSurface = Color(0xFFE0DFF7);
-  static const Color lightAccent = Color(0xFFF2C94C);
-  static const Color lightPrimary = Color(0xFF8B5CF6);
-  static const Color lightSecondary = Color(0xFFA78BFA);
-  
-  static const Color darkBackground = Color(0xFF1A1A2E);
-  static const Color darkSurface = Color(0xFF16213E);
-  static const Color darkAccent = Color(0xFFFFD93D);
-  static const Color darkPrimary = Color(0xFF7C3AED);
-  static const Color darkSecondary = Color(0xFF8B5CF6);
-  
-  // Neumorphism Shadows
-  static List<BoxShadow> get lightShadows => [
-    BoxShadow(
-      color: Colors.black.withOpacity(0.1),
-      blurRadius: 20,
-      offset: const Offset(10, 10),
-    ),
-    BoxShadow(
-      color: Colors.white.withOpacity(0.8),
-      blurRadius: 20,
-      offset: const Offset(-10, -10),
-    ),
-  ];
-  
-  static List<BoxShadow> get lightPressedShadows => [
-    BoxShadow(
-      color: Colors.black.withOpacity(0.1),
-      blurRadius: 10,
-      offset: const Offset(5, 5),
-    ),
-  ];
-  
-  static List<BoxShadow> get darkShadows => [
-    BoxShadow(
-      color: Colors.black.withOpacity(0.3),
-      blurRadius: 20,
-      offset: const Offset(10, 10),
-    ),
-    BoxShadow(
-      color: Colors.white.withOpacity(0.05),
-      blurRadius: 20,
-      offset: const Offset(-10, -10),
-    ),
-  ];
-  
-  static List<BoxShadow> get darkPressedShadows => [
-    BoxShadow(
-      color: Colors.black.withOpacity(0.3),
-      blurRadius: 10,
-      offset: const Offset(5, 5),
-    ),
-  ];
+  // Light Theme - Warm & Soft
+  static const Color lightBackground = Color(0xFFFDFCFB);
+  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightPrimary = Color(0xFFFFA726); // Softer Orange
+  static const Color lightSecondary = Color(0xFFFFCA28); // Softer Yellow
+  static const Color lightAccent = Color(0xFFEF5350); // Softer Red
+  static const Color lightText = Color(0xFF37474F); // Darker Slate
+  static const Color lightTextSecondary = Color(0xFF78909C); // Lighter Slate
+  static const Color lightCard = Color(0xFFFFFFFF);
+  static const Color lightBorder = Color(0xFFE0E0E0);
+
+  // Dark Theme - Deeper & Elegant
+  static const Color darkBackground = Color(0xFF121212); // True black
+  static const Color darkSurface = Color(0xFF1E1E1E); // Slightly lighter black
+  static const Color darkPrimary = Color(0xFFBB86FC); // Lavender
+  static const Color darkSecondary = Color(0xFF03DAC6); // Teal
+  static const Color darkAccent = Color(0xFFCF6679); // Muted Red
+  static const Color darkText = Color(0xFFE0E0E0); // Off-white
+  static const Color darkTextSecondary = Color(0xFFB0B0B0); // Gray
+  static const Color darkCard = Color(0xFF1E1E1E);
+  static const Color darkBorder = Color(0xFF2C2C2C);
   
   // Current theme colors
   Color get backgroundColor => _isDarkMode ? darkBackground : lightBackground;
   Color get surfaceColor => _isDarkMode ? darkSurface : lightSurface;
-  Color get accentColor => _isDarkMode ? darkAccent : lightAccent;
   Color get primaryColor => _isDarkMode ? darkPrimary : lightPrimary;
   Color get secondaryColor => _isDarkMode ? darkSecondary : lightSecondary;
+  Color get accentColor => _isDarkMode ? darkAccent : lightAccent;
+  Color get textColor => _isDarkMode ? darkText : lightText;
+  Color get textSecondaryColor => _isDarkMode ? darkTextSecondary : lightTextSecondary;
+  Color get cardColor => _isDarkMode ? darkCard : lightCard;
+  Color get borderColor => _isDarkMode ? darkBorder : lightBorder;
   
-  // Current shadows
+  // Shadows for both themes
+  List<BoxShadow> get lightShadows => [
+    BoxShadow(
+      color: Colors.grey.withOpacity(0.2),
+      blurRadius: 20,
+      offset: const Offset(0, 10),
+    ),
+  ];
+  
+  List<BoxShadow> get darkShadows => [
+    BoxShadow(
+      color: Colors.black.withOpacity(0.5),
+      blurRadius: 20,
+      offset: const Offset(0, 10),
+    ),
+  ];
+  
   List<BoxShadow> get shadows => _isDarkMode ? darkShadows : lightShadows;
-  List<BoxShadow> get pressedShadows => _isDarkMode ? darkPressedShadows : lightPressedShadows;
+  
+  // Gradients
+  LinearGradient get primaryGradient => LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: _isDarkMode 
+        ? [darkPrimary, darkSecondary]
+        : [lightPrimary, lightSecondary],
+  );
+  
+  LinearGradient get backgroundGradient => LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: _isDarkMode 
+        ? [darkBackground, darkSurface]
+        : [lightBackground, lightSurface],
+  );
   
   void toggleTheme() {
     _isDarkMode = !_isDarkMode;
